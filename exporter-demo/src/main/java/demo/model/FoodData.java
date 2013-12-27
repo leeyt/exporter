@@ -14,7 +14,7 @@ Copyright (C) 2012 Potix Corporation. All Rights Reserved.
 {{IS_RIGHT
 }}IS_RIGHT
 */
-package demo;
+package demo.model;
 
 import java.util.ArrayList;
 import java.util.Iterator;

@@ -14,7 +14,7 @@ Copyright (C) 2012 Potix Corporation. All Rights Reserved.
 {{IS_RIGHT
 }}IS_RIGHT
 */
-package demo;
+package demo.model;
 
 import java.io.Serializable;
 import java.util.Comparator;
@@ -25,6 +25,7 @@ import org.zkoss.zul.GroupComparator;
  * @author Sam
  *
  */
+@SuppressWarnings("serial")
 public class FoodComparator implements Comparator<Food>, GroupComparator<Food>, Serializable {
 	
     public int compare(Food o1, Food o2) {

@@ -51,9 +51,9 @@ import com.lowagie.text.Phrase;
 import com.lowagie.text.pdf.PdfPCell;
 import com.lowagie.text.pdf.PdfPTable;
 
-import demo.Food;
-import demo.FoodComparator;
-import demo.FoodData;
+import demo.model.Food;
+import demo.model.FoodComparator;
+import demo.model.FoodData;
 
 /**
  * @author Sam
@@ -207,7 +207,6 @@ public class FoodGroupVM {
 		Filedownload.save(amedia);
 		
 		out.close();
-		
 	}
 	
 	@Command
