@@ -16,9 +16,6 @@ Copyright (C) 2012 Potix Corporation. All Rights Reserved.
 */
 package org.zkoss.exporter.util;
 
-import static org.zkoss.exporter.util.Utils.getHeaders;
-import static org.zkoss.exporter.util.Utils.invokeComponentGetter;
-
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.List;
@@ -37,7 +34,7 @@ public class Utils {
 	private Utils() {};
 	
 	public static MeshElement getTarget(Component cmp) {
-		MeshElement target = (MeshElement) invokeComponentGetter(cmp, "getListbox", "getGrid");
+		MeshElement target = (MeshElement) invokeComponentGetter(cmp, "getListbox", "getGrid", "getTree");
 		if (target == null)
 			throw new IllegalArgumentException(cmp + " cannot find tagret (MeshElement)");
 		return target;
@@ -45,11 +42,11 @@ public class Utils {
 	
 	public static Component getFooters(Component target) {
 		//get Grid's foot component or get Listbox's Listfoot component
-		return (Component)invokeComponentGetter(target, "getFoot", "getListfoot");
+		return (Component)invokeComponentGetter(target, "getFoot", "getListfoot", "getTreefoot");
 	}
 	
 	public static Component getFooterColumnHeader(Component footer) {
-		return (Component)invokeComponentGetter(footer, "getColumn", "getListheader");
+		return (Component)invokeComponentGetter(footer, "getColumn", "getListheader", "getTreecol");
 	}
 	
 	public static String getStringValue(Component component) {
@@ -90,8 +87,8 @@ public class Utils {
 		Class<? extends Component> cls = target.getClass();
 		for (String methodName : methods) {
 			try {
-				Method method = cls.getMethod(methodName, null);
-				Object ret = method.invoke(target, null);
+				Method method = cls.getMethod(methodName, (Class<?>[])null);
+				Object ret = method.invoke(target, (Object[]) null);
 				if (ret != null)
 					return ret;
 			} catch (SecurityException e) {

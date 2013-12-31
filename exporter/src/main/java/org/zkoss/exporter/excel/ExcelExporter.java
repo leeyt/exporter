@@ -36,6 +36,7 @@ import org.zkoss.exporter.AbstractExporter;
 import org.zkoss.exporter.GroupRenderer;
 import org.zkoss.exporter.RowRenderer;
 import org.zkoss.exporter.excel.imp.CellValueSetterFactoryImpl;
+import org.zkoss.exporter.util.Utils;
 import org.zkoss.poi.ss.usermodel.Cell;
 import org.zkoss.poi.ss.usermodel.Row;
 import org.zkoss.poi.ss.usermodel.Sheet;
@@ -44,6 +45,8 @@ import org.zkoss.poi.xssf.usermodel.XSSFSheet;
 import org.zkoss.poi.xssf.usermodel.XSSFWorkbook;
 import org.zkoss.zk.ui.Component;
 import org.zkoss.zul.Auxhead;
+import org.zkoss.zul.Treecell;
+import org.zkoss.zul.Treeitem;
 import org.zkoss.zul.impl.HeaderElement;
 import org.zkoss.zul.impl.MeshElement;
 
@@ -220,6 +223,13 @@ public class ExcelExporter extends AbstractExporter <XSSFWorkbook, Row> {
 	protected void exportGroupfoot(int columnSize, Component groupfoot,	XSSFWorkbook book) {
 		exportCellsWithSpan(columnSize, groupfoot, book);
 	}
+	
+	private String indent(int level) {
+		StringBuffer sb = new StringBuffer();
+		for (int i = 0; i < level; i++)
+			sb.append("  ");
+		return sb.toString();
+	}
 
 	@Override
 	protected void exportCells(int rowIndex, int columnSize, Component row,	XSSFWorkbook book) {
@@ -237,7 +247,14 @@ public class ExcelExporter extends AbstractExporter <XSSFWorkbook, Row> {
 			}
 			
 			Cell cell = getOrCreateCell(ctx.moveToNextCell(), sheet);
-			cellValueSetter.setCellValue(cmp, cell);
+			if (!(cmp instanceof Treecell) || c != 0)
+				cellValueSetter.setCellValue(cmp, cell);
+			else {
+				Treeitem item = (Treeitem) cmp.getParent().getParent();
+				
+				String label = indent(item.getLevel()) + Utils.getStringValue(cmp);
+				cell.setCellValue(label);
+			}
 			
 			syncAlignment(cmp, headers != null ? headers.get(c) : null, cell, book);
 		}

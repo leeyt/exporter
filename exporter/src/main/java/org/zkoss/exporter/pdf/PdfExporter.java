@@ -42,6 +42,8 @@ import org.zkoss.exporter.pdf.impl.PdfWriterFactoryImpl;
 import org.zkoss.zk.ui.Component;
 import org.zkoss.zul.Auxhead;
 import org.zkoss.zul.Auxheader;
+import org.zkoss.zul.Treecell;
+import org.zkoss.zul.Treeitem;
 import org.zkoss.zul.impl.HeaderElement;
 import org.zkoss.zul.impl.MeshElement;
 
@@ -155,7 +157,7 @@ public class PdfExporter extends AbstractExporter<PdfPTable, PdfPTable> {
 			return;
 		}
 		
-		List<Component> children = target.getChildren();
+		List<Component> children = footers.getChildren();
 		int colSpan = 0;
 		for (int i = 0; i < columnSize; i++) {
 			Component current = i < children.size() ? children.get(i) : null;
@@ -201,6 +203,13 @@ public class PdfExporter extends AbstractExporter<PdfPTable, PdfPTable> {
 		return headers;
 	}
 	
+	private String indent(int level) {
+		StringBuffer sb = new StringBuffer();
+		for (int i = 0; i < level; i++)
+			sb.append("  ");
+		return sb.toString();
+	}
+	
 	protected void exportCells(int rowIndex, int columnSize, Component row, PdfPTable table) {
 		HashMap<Integer, Component> headers = buildHeaderIndexMap(getHeaders(getTarget(row)));
 		
@@ -216,7 +225,12 @@ public class PdfExporter extends AbstractExporter<PdfPTable, PdfPTable> {
 			}
 			
 			PdfPCell cell = getPdfPCellFactory().getCell(isOddRow(rowIndex));
-			cell.setPhrase(new Phrase(getStringValue(cmp), getFontFactory().getFont(FontFactory.FONT_TYPE_CELL)));
+			String label = getStringValue(cmp);
+			if (cmp instanceof Treecell && c == 0) {
+				Treeitem item = (Treeitem) cmp.getParent().getParent();
+				label = indent(item.getLevel()) + label;
+			}
+			cell.setPhrase(new Phrase(label, getFontFactory().getFont(FontFactory.FONT_TYPE_CELL)));
 			
 			syncCellColSpan(cmp, cell);
 			syncAlignment(cmp, headers != null ? headers.get(c) : null, cell);

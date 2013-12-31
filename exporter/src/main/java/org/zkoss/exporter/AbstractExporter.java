@@ -19,6 +19,7 @@ package org.zkoss.exporter;
 import static org.zkoss.exporter.util.Utils.invokeComponentGetter;
 
 import java.io.OutputStream;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
@@ -34,6 +35,8 @@ import org.zkoss.zul.Listgroupfoot;
 import org.zkoss.zul.Listhead;
 import org.zkoss.zul.Listitem;
 import org.zkoss.zul.Row;
+import org.zkoss.zul.Treecols;
+import org.zkoss.zul.Treerow;
 import org.zkoss.zul.impl.MeshElement;
 
 /**
@@ -170,7 +173,7 @@ public abstract class AbstractExporter <E, T> {
 		for (Component cmp : children) {
 			if (cmp instanceof Auxhead) {
 				exportAuxhead(columnSize, (Auxhead)cmp, e);
-			} else if (cmp instanceof Columns || cmp instanceof Listhead) {
+			} else if (cmp instanceof Columns || cmp instanceof Listhead || cmp instanceof Treecols) {
 				exportColumnHeaders(cmp, e);
 			}
 		}
@@ -185,22 +188,39 @@ public abstract class AbstractExporter <E, T> {
 	 */
 	protected void exportRows(int columnSize, MeshElement target, E e) {
 		int rowIndex = 0;
-		Component rows = null;
-		try {
-			rows = (Component)invokeComponentGetter(target, "getRows");//for grid
-		} catch (ClassCastException ex) {//listbox's getRows will return Integer
-		}
-		for (Component cmp : rows != null ? rows.getChildren() : target.getChildren()) {
+		List<Component> rows = null;
+		if (target instanceof Grid)
+			rows = ((Component)invokeComponentGetter(target, "getRows")).getChildren();
+		else if (target instanceof Listbox)
+			rows = target.getChildren();
+		else // tree
+			rows = getTreeRows(target);
+
+		for (Component cmp : rows) {
 			if (cmp instanceof Listitem || cmp instanceof Row) {
 				if (cmp instanceof Listgroup || cmp instanceof Group) {
 					exportGroup(columnSize, cmp, e);
 				} else if (cmp instanceof Listgroupfoot || cmp instanceof Groupfoot){
 					exportGroupfoot(columnSize, cmp, e);
-				} else {
-					exportCells(rowIndex++, columnSize, cmp, e);
 				}
-			}
+			} else
+				exportCells(rowIndex++, columnSize, cmp, e);
 		}
+	}
+	
+	private List<Component> getTreeRows(Component root) {
+		List<Component> rows = new ArrayList<Component>();
+		
+		if (root == null)
+			return null;
+		
+		for (Component child : root.getChildren()) {
+			if (child instanceof Treerow)
+				rows.add(child);
+			else
+				rows.addAll(getTreeRows(child));
+		}
+		return rows;
 	}
 	
 	/**
@@ -214,11 +234,7 @@ public abstract class AbstractExporter <E, T> {
 		if (component == null)
 			throw new RuntimeException("export target reference is null");
 		
-		if (component instanceof Grid || component instanceof Listbox) {
-			exportTabularComponent(component, outputStream);
-		} else {
-			throw new RuntimeException("Component not support export to PDF");
-		}
+		exportTabularComponent(component, outputStream);
 	}
 	
 	/**
